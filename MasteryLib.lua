@@ -1,14 +1,18 @@
+
+-- MasteryHub UI Library (Universal) - With Dropdown, No Textbox
+
 local MasteryHub = {}
 
 function MasteryHub:CreateWindow(config)
     local title = config.Title or "MASTERY HUB"
     local logoAsset = config.Logo or "rbxassetid://75617874946759"
+
     local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
     gui.Name = "MasteryHubUI"
 
     local main = Instance.new("Frame", gui)
-    main.Size = UDim2.new(0, 530, 0, 380)
-    main.Position = UDim2.new(0.5, -265, 0.5, -190)
+    main.Size = UDim2.new(0, 530, 0, 400)
+    main.Position = UDim2.new(0.5, -265, 0.5, -200)
     main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     main.Active = true
     main.Draggable = true
@@ -20,14 +24,13 @@ function MasteryHub:CreateWindow(config)
     header.Text = title
     header.Font = Enum.Font.GothamBold
     header.TextSize = 20
-    header.TextColor3 = Color3.fromRGB(255, 70, 70)
-    header.TextStrokeTransparency = 0.5
+    header.TextColor3 = Color3.fromRGB(255, 255, 255)
     Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
     local tabBar = Instance.new("Frame", main)
     tabBar.Position = UDim2.new(0, 0, 0, 40)
     tabBar.Size = UDim2.new(1, 0, 0, 30)
-    tabBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    tabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     local tabLayout = Instance.new("UIListLayout", tabBar)
     tabLayout.FillDirection = Enum.FillDirection.Horizontal
     tabLayout.Padding = UDim.new(0, 6)
@@ -37,13 +40,11 @@ function MasteryHub:CreateWindow(config)
     content.Size = UDim2.new(1, 0, 1, -70)
     content.BackgroundTransparency = 1
 
-    -- Toggle UI Button (logo)
     local toggle = Instance.new("ImageButton", gui)
     toggle.Size = UDim2.new(0, 42, 0, 42)
     toggle.Position = UDim2.new(0, 10, 0, 10)
     toggle.Image = logoAsset
     toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    toggle.Name = "ToggleUI"
     toggle.ZIndex = 999
     Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
 
@@ -51,13 +52,35 @@ function MasteryHub:CreateWindow(config)
         main.Visible = not main.Visible
     end)
 
+    local function Notify(title, msg)
+        local popup = Instance.new("TextLabel", gui)
+        popup.Size = UDim2.new(0, 300, 0, 60)
+        popup.Position = UDim2.new(0.5, -150, 0, -70)
+        popup.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        popup.TextColor3 = Color3.new(1, 1, 1)
+        popup.Font = Enum.Font.GothamBold
+        popup.TextSize = 16
+        popup.Text = title .. "\n" .. msg
+        popup.TextWrapped = true
+        popup.ZIndex = 999
+        Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
+        popup:TweenPosition(UDim2.new(0.5, -150, 0, 30), "Out", "Quad", 0.3, true)
+        task.delay(2.5, function()
+            popup:TweenPosition(UDim2.new(0.5, -150, 0, -70), "In", "Quad", 0.3, true)
+            task.delay(0.3, function() popup:Destroy() end)
+        end)
+    end
+
     local API = {}
 
+    function API:Notify(title, msg)
+        Notify(title, msg)
+    end
+
     function API:AddTab(info)
-        local tabName = info.Title or "Tab"
         local tabBtn = Instance.new("TextButton", tabBar)
         tabBtn.Size = UDim2.new(0, 100, 1, 0)
-        tabBtn.Text = tabName
+        tabBtn.Text = info.Title or "Tab"
         tabBtn.Font = Enum.Font.GothamBold
         tabBtn.TextSize = 14
         tabBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -74,8 +97,8 @@ function MasteryHub:CreateWindow(config)
         layout.Padding = UDim.new(0, 6)
 
         tabBtn.MouseButton1Click:Connect(function()
-            for _, child in ipairs(content:GetChildren()) do
-                if child:IsA("ScrollingFrame") then child.Visible = false end
+            for _, p in pairs(content:GetChildren()) do
+                if p:IsA("ScrollingFrame") then p.Visible = false end
             end
             page.Visible = true
         end)
@@ -102,20 +125,6 @@ function MasteryHub:CreateWindow(config)
             btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
             btn.MouseButton1Click:Connect(callback)
-        end
-
-        function Tab:AddTextbox(placeholder, callback)
-            local box = Instance.new("TextBox", page)
-            box.Size = UDim2.new(1, -10, 0, 30)
-            box.PlaceholderText = placeholder
-            box.Font = Enum.Font.Gotham
-            box.TextSize = 14
-            box.TextColor3 = Color3.new(1, 1, 1)
-            box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-            box.FocusLost:Connect(function(enter)
-                if enter then callback(box.Text) end
-            end)
         end
 
         function Tab:AddDropdown(list, callback)
@@ -154,26 +163,6 @@ function MasteryHub:CreateWindow(config)
         end
 
         return Tab
-    end
-
-    function API:Notify(title, message)
-        local popup = Instance.new("TextLabel", gui)
-        popup.Size = UDim2.new(0, 300, 0, 60)
-        popup.Position = UDim2.new(0.5, -150, 0, -70)
-        popup.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        popup.TextColor3 = Color3.new(1, 1, 1)
-        popup.Font = Enum.Font.GothamBold
-        popup.TextSize = 16
-        popup.Text = title .. "\\n" .. message
-        popup.TextWrapped = true
-        popup.ZIndex = 999
-        Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
-
-        popup:TweenPosition(UDim2.new(0.5, -150, 0, 30), "Out", "Quad", 0.3, true)
-        task.delay(2.5, function()
-            popup:TweenPosition(UDim2.new(0.5, -150, 0, -70), "In", "Quad", 0.3, true)
-            task.delay(0.3, function() popup:Destroy() end)
-        end)
     end
 
     return API
