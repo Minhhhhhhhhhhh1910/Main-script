@@ -1,124 +1,182 @@
 local MasteryHub = {}
 
-function MasteryHub:CreateWindow(settings)
-    local ScreenGui = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
-    local MainFrame = Instance.new("Frame", ScreenGui)
-    MainFrame.Size = UDim2.new(0, 600, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    MainFrame.Name = "MASTERY_HUB_UI"
-    Instance.new("UICorner", MainFrame)
+function MasteryHub:CreateWindow(config)
+    local title = config.Title or "MASTERY HUB"
+    local logoAsset = config.Logo or "rbxassetid://75617874946759"
+    local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    gui.Name = "MasteryHubUI"
 
-    local TitleBar = Instance.new("TextLabel", MainFrame)
-    TitleBar.Text = settings.Title or "MASTERY HUB"
-    TitleBar.Size = UDim2.new(1, 0, 0, 40)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-    TitleBar.TextColor3 = Color3.new(1, 1, 1)
-    TitleBar.Font = Enum.Font.GothamBold
-    TitleBar.TextSize = 20
-    Instance.new("UICorner", TitleBar)
+    local main = Instance.new("Frame", gui)
+    main.Size = UDim2.new(0, 530, 0, 380)
+    main.Position = UDim2.new(0.5, -265, 0.5, -190)
+    main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    main.Active = true
+    main.Draggable = true
+    Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
-    if settings.Logo then
-        local Logo = Instance.new("ImageLabel", TitleBar)
-        Logo.Size = UDim2.new(0, 30, 0, 30)
-        Logo.Position = UDim2.new(0, 5, 0.5, -15)
-        Logo.Image = settings.Logo
-        Logo.BackgroundTransparency = 1
-    end
+    local header = Instance.new("TextLabel", main)
+    header.Size = UDim2.new(1, 0, 0, 40)
+    header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    header.Text = title
+    header.Font = Enum.Font.GothamBold
+    header.TextSize = 20
+    header.TextColor3 = Color3.fromRGB(255, 70, 70)
+    header.TextStrokeTransparency = 0.5
+    Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
-    local TabBar = Instance.new("Frame", MainFrame)
-    TabBar.Size = UDim2.new(0, 150, 1, -40)
-    TabBar.Position = UDim2.new(0, 0, 0, 40)
-    TabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Instance.new("UICorner", TabBar)
+    local tabBar = Instance.new("Frame", main)
+    tabBar.Position = UDim2.new(0, 0, 0, 40)
+    tabBar.Size = UDim2.new(1, 0, 0, 30)
+    tabBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    local tabLayout = Instance.new("UIListLayout", tabBar)
+    tabLayout.FillDirection = Enum.FillDirection.Horizontal
+    tabLayout.Padding = UDim.new(0, 6)
 
-    local ContentFrame = Instance.new("Frame", MainFrame)
-    ContentFrame.Size = UDim2.new(1, -160, 1, -50)
-    ContentFrame.Position = UDim2.new(0, 160, 0, 45)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Instance.new("UICorner", ContentFrame)
+    local content = Instance.new("Frame", main)
+    content.Position = UDim2.new(0, 0, 0, 70)
+    content.Size = UDim2.new(1, 0, 1, -70)
+    content.BackgroundTransparency = 1
 
-    local tabs = {}
+    -- Toggle UI Button (logo)
+    local toggle = Instance.new("ImageButton", gui)
+    toggle.Size = UDim2.new(0, 42, 0, 42)
+    toggle.Position = UDim2.new(0, 10, 0, 10)
+    toggle.Image = logoAsset
+    toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    toggle.Name = "ToggleUI"
+    toggle.ZIndex = 999
+    Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
 
-    function MainFrame:AddTab(name)
-        local tabBtn = Instance.new("TextButton", TabBar)
-        tabBtn.Size = UDim2.new(1, -10, 0, 35)
-        tabBtn.Position = UDim2.new(0, 5, 0, #tabs * 40 + 5)
-        tabBtn.Text = name
-        tabBtn.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
-        tabBtn.TextColor3 = Color3.new(1, 1, 1)
+    toggle.MouseButton1Click:Connect(function()
+        main.Visible = not main.Visible
+    end)
+
+    local API = {}
+
+    function API:AddTab(info)
+        local tabName = info.Title or "Tab"
+        local tabBtn = Instance.new("TextButton", tabBar)
+        tabBtn.Size = UDim2.new(0, 100, 1, 0)
+        tabBtn.Text = tabName
         tabBtn.Font = Enum.Font.GothamBold
         tabBtn.TextSize = 14
-        Instance.new("UICorner", tabBtn)
+        tabBtn.TextColor3 = Color3.new(1, 1, 1)
+        tabBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 6)
 
-        local tabContent = Instance.new("Frame", ContentFrame)
-        tabContent.Size = UDim2.new(1, -10, 1, -10)
-        tabContent.Position = UDim2.new(0, 5, 0, 5)
-        tabContent.BackgroundTransparency = 1
-        tabContent.Visible = false
-
-        local layout = Instance.new("UIListLayout", tabContent)
+        local page = Instance.new("ScrollingFrame", content)
+        page.Size = UDim2.new(1, 0, 1, 0)
+        page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        page.ScrollBarThickness = 6
+        page.BackgroundTransparency = 1
+        page.Visible = false
+        local layout = Instance.new("UIListLayout", page)
         layout.Padding = UDim.new(0, 6)
-        layout.SortOrder = Enum.SortOrder.LayoutOrder
 
-        local tab = {}
+        tabBtn.MouseButton1Click:Connect(function()
+            for _, child in ipairs(content:GetChildren()) do
+                if child:IsA("ScrollingFrame") then child.Visible = false end
+            end
+            page.Visible = true
+        end)
 
-        function tab:AddLabel(text)
-            local lbl = Instance.new("TextLabel", tabContent)
+        local Tab = {}
+
+        function Tab:AddLabel(text)
+            local lbl = Instance.new("TextLabel", page)
             lbl.Size = UDim2.new(1, -10, 0, 25)
             lbl.Text = text
-            lbl.TextColor3 = Color3.new(1, 1, 1)
             lbl.Font = Enum.Font.Gotham
             lbl.TextSize = 14
+            lbl.TextColor3 = Color3.new(1, 1, 1)
             lbl.BackgroundTransparency = 1
         end
 
-        function tab:AddButton(text, callback)
-            local btn = Instance.new("TextButton", tabContent)
+        function Tab:AddButton(text, callback)
+            local btn = Instance.new("TextButton", page)
             btn.Size = UDim2.new(1, -10, 0, 30)
             btn.Text = text
-            btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-            btn.TextColor3 = Color3.new(1, 1, 1)
             btn.Font = Enum.Font.GothamBold
             btn.TextSize = 14
-            Instance.new("UICorner", btn)
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
             btn.MouseButton1Click:Connect(callback)
         end
 
-        function tab:AddToggle(text, callback)
-            local toggle = Instance.new("TextButton", tabContent)
-            toggle.Size = UDim2.new(1, -10, 0, 30)
-            toggle.Text = text .. ": OFF"
-            toggle.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-            toggle.TextColor3 = Color3.new(1, 1, 1)
-            toggle.Font = Enum.Font.Gotham
-            toggle.TextSize = 14
-            Instance.new("UICorner", toggle)
-            local state = false
-            toggle.MouseButton1Click:Connect(function()
-                state = not state
-                toggle.Text = text .. ": " .. (state and "ON" or "OFF")
-                callback(state)
+        function Tab:AddTextbox(placeholder, callback)
+            local box = Instance.new("TextBox", page)
+            box.Size = UDim2.new(1, -10, 0, 30)
+            box.PlaceholderText = placeholder
+            box.Font = Enum.Font.Gotham
+            box.TextSize = 14
+            box.TextColor3 = Color3.new(1, 1, 1)
+            box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+            box.FocusLost:Connect(function(enter)
+                if enter then callback(box.Text) end
             end)
         end
 
-        tabBtn.MouseButton1Click:Connect(function()
-            for _, t in pairs(tabs) do
-                t.content.Visible = false
-            end
-            tabContent.Visible = true
-        end)
+        function Tab:AddDropdown(list, callback)
+            local drop = Instance.new("TextButton", page)
+            drop.Size = UDim2.new(1, -10, 0, 30)
+            drop.Text = "Select"
+            drop.Font = Enum.Font.Gotham
+            drop.TextSize = 14
+            drop.TextColor3 = Color3.new(1, 1, 1)
+            drop.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            Instance.new("UICorner", drop).CornerRadius = UDim.new(0, 6)
 
-        tab.content = tabContent
-        table.insert(tabs, tab)
-        if #tabs == 1 then
-            tabContent.Visible = true
+            local menu = Instance.new("Frame", drop)
+            menu.Size = UDim2.new(1, 0, 0, #list * 25)
+            menu.Position = UDim2.new(0, 0, 1, 0)
+            menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            menu.Visible = false
+            local layout = Instance.new("UIListLayout", menu)
+
+            for _, item in ipairs(list) do
+                local opt = Instance.new("TextButton", menu)
+                opt.Size = UDim2.new(1, 0, 0, 25)
+                opt.Text = item
+                opt.TextColor3 = Color3.new(1, 1, 1)
+                opt.BackgroundTransparency = 1
+                opt.MouseButton1Click:Connect(function()
+                    drop.Text = item
+                    menu.Visible = false
+                    callback(item)
+                end)
+            end
+
+            drop.MouseButton1Click:Connect(function()
+                menu.Visible = not menu.Visible
+            end)
         end
 
-        return tab
+        return Tab
     end
 
-    return MainFrame
+    function API:Notify(title, message)
+        local popup = Instance.new("TextLabel", gui)
+        popup.Size = UDim2.new(0, 300, 0, 60)
+        popup.Position = UDim2.new(0.5, -150, 0, -70)
+        popup.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        popup.TextColor3 = Color3.new(1, 1, 1)
+        popup.Font = Enum.Font.GothamBold
+        popup.TextSize = 16
+        popup.Text = title .. "\\n" .. message
+        popup.TextWrapped = true
+        popup.ZIndex = 999
+        Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
+
+        popup:TweenPosition(UDim2.new(0.5, -150, 0, 30), "Out", "Quad", 0.3, true)
+        task.delay(2.5, function()
+            popup:TweenPosition(UDim2.new(0.5, -150, 0, -70), "In", "Quad", 0.3, true)
+            task.delay(0.3, function() popup:Destroy() end)
+        end)
+    end
+
+    return API
 end
 
 return MasteryHub
