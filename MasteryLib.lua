@@ -1,12 +1,11 @@
 
--- MasteryHub UI Library (Universal) - With Dropdown, No Textbox
+-- MasteryHub UI LIB (Tab gọn trong UI + hoạt động đầy đủ)
 
 local MasteryHub = {}
 
 function MasteryHub:CreateWindow(config)
     local title = config.Title or "MASTERY HUB"
     local logoAsset = config.Logo or "rbxassetid://75617874946759"
-
     local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
     gui.Name = "MasteryHubUI"
 
@@ -24,28 +23,29 @@ function MasteryHub:CreateWindow(config)
     header.Text = title
     header.Font = Enum.Font.GothamBold
     header.TextSize = 20
-    header.TextColor3 = Color3.fromRGB(255, 255, 255)
+    header.TextColor3 = Color3.new(1, 1, 1)
     Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
     local tabBar = Instance.new("Frame", main)
-    tabBar.Position = UDim2.new(0, 0, 0, 40)
     tabBar.Size = UDim2.new(1, 0, 0, 30)
+    tabBar.Position = UDim2.new(0, 0, 0, 40)
     tabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     local tabLayout = Instance.new("UIListLayout", tabBar)
     tabLayout.FillDirection = Enum.FillDirection.Horizontal
-    tabLayout.Padding = UDim.new(0, 6)
+    tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    tabLayout.Padding = UDim.new(0, 4)
 
     local content = Instance.new("Frame", main)
-    content.Position = UDim2.new(0, 0, 0, 70)
     content.Size = UDim2.new(1, 0, 1, -70)
+    content.Position = UDim2.new(0, 0, 0, 70)
     content.BackgroundTransparency = 1
 
+    -- Logo toggle
     local toggle = Instance.new("ImageButton", gui)
     toggle.Size = UDim2.new(0, 42, 0, 42)
     toggle.Position = UDim2.new(0, 10, 0, 10)
     toggle.Image = logoAsset
     toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    toggle.ZIndex = 999
     Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
 
     toggle.MouseButton1Click:Connect(function()
@@ -91,14 +91,16 @@ function MasteryHub:CreateWindow(config)
         page.Size = UDim2.new(1, 0, 1, 0)
         page.AutomaticCanvasSize = Enum.AutomaticSize.Y
         page.ScrollBarThickness = 6
-        page.BackgroundTransparency = 1
         page.Visible = false
+        page.BackgroundTransparency = 1
         local layout = Instance.new("UIListLayout", page)
         layout.Padding = UDim.new(0, 6)
 
         tabBtn.MouseButton1Click:Connect(function()
-            for _, p in pairs(content:GetChildren()) do
-                if p:IsA("ScrollingFrame") then p.Visible = false end
+            for _, c in pairs(content:GetChildren()) do
+                if c:IsA("ScrollingFrame") then
+                    c.Visible = false
+                end
             end
             page.Visible = true
         end)
@@ -125,41 +127,6 @@ function MasteryHub:CreateWindow(config)
             btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
             btn.MouseButton1Click:Connect(callback)
-        end
-
-        function Tab:AddDropdown(list, callback)
-            local drop = Instance.new("TextButton", page)
-            drop.Size = UDim2.new(1, -10, 0, 30)
-            drop.Text = "Select"
-            drop.Font = Enum.Font.Gotham
-            drop.TextSize = 14
-            drop.TextColor3 = Color3.new(1, 1, 1)
-            drop.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            Instance.new("UICorner", drop).CornerRadius = UDim.new(0, 6)
-
-            local menu = Instance.new("Frame", drop)
-            menu.Size = UDim2.new(1, 0, 0, #list * 25)
-            menu.Position = UDim2.new(0, 0, 1, 0)
-            menu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            menu.Visible = false
-            local layout = Instance.new("UIListLayout", menu)
-
-            for _, item in ipairs(list) do
-                local opt = Instance.new("TextButton", menu)
-                opt.Size = UDim2.new(1, 0, 0, 25)
-                opt.Text = item
-                opt.TextColor3 = Color3.new(1, 1, 1)
-                opt.BackgroundTransparency = 1
-                opt.MouseButton1Click:Connect(function()
-                    drop.Text = item
-                    menu.Visible = false
-                    callback(item)
-                end)
-            end
-
-            drop.MouseButton1Click:Connect(function()
-                menu.Visible = not menu.Visible
-            end)
         end
 
         return Tab
