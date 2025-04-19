@@ -1,133 +1,171 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- MasteryUILib: MAKE BY MASTERY TEAM + UI ONLY WORLD
 local TweenService = game:GetService("TweenService")
-local UIS = game:GetService("UserInputService")
-local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
 
--- Tạo GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = player.PlayerGui
-ScreenGui.Name = "CustomUI"
+local MasteryUILib = {}
+local savedTabKey = "MasteryUILib_LastTab"
 
--- Tạo Container cho Window
-local window = Instance.new("Frame")
-window.Size = UDim2.new(0, 400, 0, 300)
-window.Position = UDim2.new(0.5, -200, 0.5, -150)
-window.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-window.BorderSizePixel = 0
-window.Parent = ScreenGui
-window.AnchorPoint = Vector2.new(0.5, 0.5)
+local function randomColor()
+    return Color3.fromHSV(math.random(), 0.6, 1)
+end
 
--- Tạo Tab Header
-local tabHeader = Instance.new("Frame")
-tabHeader.Size = UDim2.new(1, 0, 0, 50)
-tabHeader.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-tabHeader.BorderSizePixel = 0
-tabHeader.Parent = window
+function MasteryUILib:CreateWindow(config)
+    local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+    ScreenGui.Name = "MasteryUILib_" .. HttpService:GenerateGUID(false)
+    ScreenGui.ResetOnSpawn = false
 
--- Tạo Nút Tab
-local tabButton = Instance.new("TextButton")
-tabButton.Size = UDim2.new(1, 0, 1, 0)
-tabButton.BackgroundTransparency = 1
-tabButton.Text = "Status and Server"
-tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabButton.TextSize = 20
-tabButton.Font = Enum.Font.GothamBold
-tabButton.Parent = tabHeader
+    local MainFrame = Instance.new("Frame", ScreenGui)
+    MainFrame.Size = UDim2.new(0, 600, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    MainFrame.Name = "MainUI"
 
--- Tạo Nút Đóng/Mở Tab
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 30, 0, 30)
-toggleButton.Position = UDim2.new(1, -40, 0, 10)
-toggleButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-toggleButton.Text = "X"
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.TextSize = 20
-toggleButton.Font = Enum.Font.GothamBold
-toggleButton.Parent = tabHeader
+    local UICorner = Instance.new("UICorner", MainFrame)
+    UICorner.CornerRadius = UDim.new(0, 8)
 
--- Tạo Tab Content (Nội dung của Tab)
-local tabContent = Instance.new("Frame")
-tabContent.Size = UDim2.new(1, 0, 1, -50)
-tabContent.Position = UDim2.new(0, 0, 0, 50)
-tabContent.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-tabContent.BorderSizePixel = 0
-tabContent.Visible = false
-tabContent.Parent = window
+    local TopBar = Instance.new("Frame", MainFrame)
+    TopBar.Size = UDim2.new(1, 0, 0, 40)
+    TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    TopBar.Name = "TopBar"
 
--- Tạo Nội Dung Tab
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundTransparency = 1
-title.Text = "Server Status and Info"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 20
-title.Font = Enum.Font.GothamBold
-title.Parent = tabContent
+    local Title = Instance.new("TextLabel", TopBar)
+    Title.Size = UDim2.new(1, -80, 1, 0)
+    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Text = config.Title or "Mastery UI"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 18
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
 
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, 0, 0, 30)
-statusLabel.Position = UDim2.new(0, 0, 0, 40)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Server Status: Online"
-statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-statusLabel.TextSize = 18
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.Parent = tabContent
+    local CloseBtn = Instance.new("TextButton", TopBar)
+    CloseBtn.Size = UDim2.new(0, 40, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -45, 0, 5)
+    CloseBtn.Text = "X"
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+    CloseBtn.AutoButtonColor = true
 
-local playersLabel = Instance.new("TextLabel")
-playersLabel.Size = UDim2.new(1, 0, 0, 30)
-playersLabel.Position = UDim2.new(0, 0, 0, 80)
-playersLabel.BackgroundTransparency = 1
-playersLabel.Text = "Players Online: 250"
-playersLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-playersLabel.TextSize = 18
-playersLabel.Font = Enum.Font.Gotham
-playersLabel.Parent = tabContent
+    local TabHolder = Instance.new("Frame", MainFrame)
+    TabHolder.Position = UDim2.new(0, 0, 0, 40)
+    TabHolder.Size = UDim2.new(1, 0, 0, 40)
+    TabHolder.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    TabHolder.Name = "TabHolder"
 
--- Di chuyển UI
-local dragInput, mousePos, framePos
-local dragging = false
+    local TabList = Instance.new("UIListLayout", TabHolder)
+    TabList.FillDirection = Enum.FillDirection.Horizontal
+    TabList.SortOrder = Enum.SortOrder.LayoutOrder
 
-tabHeader.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        mousePos = input.Position
-        framePos = window.Position
+    local PageContainer = Instance.new("Frame", MainFrame)
+    PageContainer.Position = UDim2.new(0, 0, 0, 80)
+    PageContainer.Size = UDim2.new(1, 0, 1, -80)
+    PageContainer.BackgroundTransparency = 1
+    PageContainer.Name = "PageContainer"
+
+    local pages = {}
+    local lastTab = nil
+
+    local function switchTab(tabButton, page)
+        if lastTab then
+            lastTab.BackgroundTransparency = 0.4
+            pages[lastTab.Name].Visible = false
+        end
+        tabButton.BackgroundTransparency = 0
+        page.Visible = true
+        lastTab = tabButton
     end
-end)
 
-UIS.InputChanged:Connect(function(input)
-    if dragging then
-        local delta = input.Position - mousePos
-        window.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+    function MasteryUILib:AddTab(info)
+        local tabButton = Instance.new("TextButton", TabHolder)
+        tabButton.Size = UDim2.new(0, 120, 1, 0)
+        tabButton.Text = info.Title or "Tab"
+        tabButton.Name = info.Title or "Tab"
+        tabButton.BackgroundColor3 = randomColor()
+        tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tabButton.BackgroundTransparency = 0.4
+
+        local page = Instance.new("ScrollingFrame", PageContainer)
+        page.Size = UDim2.new(1, 0, 1, 0)
+        page.Visible = false
+        page.BackgroundTransparency = 1
+        page.ScrollBarThickness = 8
+        page.Name = info.Title or "Tab"
+
+        local layout = Instance.new("UIListLayout", page)
+        layout.Padding = UDim.new(0, 10)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+        tabButton.MouseButton1Click:Connect(function()
+            switchTab(tabButton, page)
+        end)
+
+        pages[tabButton.Name] = page
+
+        -- Load last tab
+        if not lastTab or tabButton.Name == savedTabKey then
+            switchTab(tabButton, page)
+        end
+
+        return {
+            AddSection = function(_, title)
+                local section = Instance.new("Frame", page)
+                section.Size = UDim2.new(1, -20, 0, 80)
+                section.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                section.BorderSizePixel = 0
+
+                local sectionLabel = Instance.new("TextLabel", section)
+                sectionLabel.Size = UDim2.new(1, 0, 0, 20)
+                sectionLabel.Text = title or "Section"
+                sectionLabel.Font = Enum.Font.GothamBold
+                sectionLabel.TextSize = 14
+                sectionLabel.TextColor3 = Color3.new(1,1,1)
+                sectionLabel.BackgroundTransparency = 1
+
+                return {
+                    AddButton = function(_, text, callback)
+                        local btn = Instance.new("TextButton", section)
+                        btn.Size = UDim2.new(1, -10, 0, 30)
+                        btn.Position = UDim2.new(0, 5, 0, 25)
+                        btn.Text = text
+                        btn.Font = Enum.Font.Gotham
+                        btn.TextSize = 14
+                        btn.TextColor3 = Color3.new(1,1,1)
+                        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                        btn.MouseButton1Click:Connect(callback)
+                    end
+                }
+            end
+        }
     end
-end)
 
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
+    -- Drag UI
+    local dragging, offset
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            offset = input.Position - MainFrame.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            MainFrame.Position = UDim2.new(0, input.Position.X - offset.X, 0, input.Position.Y - offset.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
 
--- Hàm Toggle Tab Content
-toggleButton.MouseButton1Click:Connect(function()
-    if tabContent.Visible then
-        -- Ẩn Tab
-        TweenService:Create(tabContent, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 0)}):Play()
-        wait(0.3)
-        tabContent.Visible = false
-    else
-        -- Hiển Thị Tab
-        tabContent.Visible = true
-        TweenService:Create(tabContent, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 1, -50)}):Play()
-    end
-end)
+    CloseBtn.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
 
--- Hiển thị UI
-window.Visible = true
+    return MasteryUILib
+end
 
--- Thiết lập cho tab button
-tabButton.MouseButton1Click:Connect(function()
-    -- Toggle hiển thị nội dung
-    toggleButton.MouseButton1Click()
-end)
+return MasteryUILib
