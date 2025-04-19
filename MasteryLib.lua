@@ -1,138 +1,133 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local player = game.Players.LocalPlayer
 
--- MasteryHub UI LIB (Tab gọn trong UI + hoạt động đầy đủ)
+-- Tạo GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = player.PlayerGui
+ScreenGui.Name = "CustomUI"
 
-local MasteryHub = {}
+-- Tạo Container cho Window
+local window = Instance.new("Frame")
+window.Size = UDim2.new(0, 400, 0, 300)
+window.Position = UDim2.new(0.5, -200, 0.5, -150)
+window.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+window.BorderSizePixel = 0
+window.Parent = ScreenGui
+window.AnchorPoint = Vector2.new(0.5, 0.5)
 
-function MasteryHub:CreateWindow(config)
-    local title = config.Title or "MASTERY HUB"
-    local logoAsset = config.Logo or "rbxassetid://75617874946759"
-    local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-    gui.Name = "MasteryHubUI"
+-- Tạo Tab Header
+local tabHeader = Instance.new("Frame")
+tabHeader.Size = UDim2.new(1, 0, 0, 50)
+tabHeader.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+tabHeader.BorderSizePixel = 0
+tabHeader.Parent = window
 
-    local main = Instance.new("Frame", gui)
-    main.Size = UDim2.new(0, 530, 0, 400)
-    main.Position = UDim2.new(0.5, -265, 0.5, -200)
-    main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    main.Active = true
-    main.Draggable = true
-    Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+-- Tạo Nút Tab
+local tabButton = Instance.new("TextButton")
+tabButton.Size = UDim2.new(1, 0, 1, 0)
+tabButton.BackgroundTransparency = 1
+tabButton.Text = "Status and Server"
+tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabButton.TextSize = 20
+tabButton.Font = Enum.Font.GothamBold
+tabButton.Parent = tabHeader
 
-    local header = Instance.new("TextLabel", main)
-    header.Size = UDim2.new(1, 0, 0, 40)
-    header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    header.Text = title
-    header.Font = Enum.Font.GothamBold
-    header.TextSize = 20
-    header.TextColor3 = Color3.new(1, 1, 1)
-    Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
+-- Tạo Nút Đóng/Mở Tab
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(1, -40, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+toggleButton.Text = "X"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextSize = 20
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = tabHeader
 
-    local tabBar = Instance.new("Frame", main)
-    tabBar.Size = UDim2.new(1, 0, 0, 30)
-    tabBar.Position = UDim2.new(0, 0, 0, 40)
-    tabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    local tabLayout = Instance.new("UIListLayout", tabBar)
-    tabLayout.FillDirection = Enum.FillDirection.Horizontal
-    tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabLayout.Padding = UDim.new(0, 4)
+-- Tạo Tab Content (Nội dung của Tab)
+local tabContent = Instance.new("Frame")
+tabContent.Size = UDim2.new(1, 0, 1, -50)
+tabContent.Position = UDim2.new(0, 0, 0, 50)
+tabContent.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+tabContent.BorderSizePixel = 0
+tabContent.Visible = false
+tabContent.Parent = window
 
-    local content = Instance.new("Frame", main)
-    content.Size = UDim2.new(1, 0, 1, -70)
-    content.Position = UDim2.new(0, 0, 0, 70)
-    content.BackgroundTransparency = 1
+-- Tạo Nội Dung Tab
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.Text = "Server Status and Info"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 20
+title.Font = Enum.Font.GothamBold
+title.Parent = tabContent
 
-    -- Logo toggle
-    local toggle = Instance.new("ImageButton", gui)
-    toggle.Size = UDim2.new(0, 42, 0, 42)
-    toggle.Position = UDim2.new(0, 10, 0, 10)
-    toggle.Image = logoAsset
-    toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.Position = UDim2.new(0, 0, 0, 40)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Server Status: Online"
+statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+statusLabel.TextSize = 18
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Parent = tabContent
 
-    toggle.MouseButton1Click:Connect(function()
-        main.Visible = not main.Visible
-    end)
+local playersLabel = Instance.new("TextLabel")
+playersLabel.Size = UDim2.new(1, 0, 0, 30)
+playersLabel.Position = UDim2.new(0, 0, 0, 80)
+playersLabel.BackgroundTransparency = 1
+playersLabel.Text = "Players Online: 250"
+playersLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+playersLabel.TextSize = 18
+playersLabel.Font = Enum.Font.Gotham
+playersLabel.Parent = tabContent
 
-    local function Notify(title, msg)
-        local popup = Instance.new("TextLabel", gui)
-        popup.Size = UDim2.new(0, 300, 0, 60)
-        popup.Position = UDim2.new(0.5, -150, 0, -70)
-        popup.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        popup.TextColor3 = Color3.new(1, 1, 1)
-        popup.Font = Enum.Font.GothamBold
-        popup.TextSize = 16
-        popup.Text = title .. "\n" .. msg
-        popup.TextWrapped = true
-        popup.ZIndex = 999
-        Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
-        popup:TweenPosition(UDim2.new(0.5, -150, 0, 30), "Out", "Quad", 0.3, true)
-        task.delay(2.5, function()
-            popup:TweenPosition(UDim2.new(0.5, -150, 0, -70), "In", "Quad", 0.3, true)
-            task.delay(0.3, function() popup:Destroy() end)
-        end)
+-- Di chuyển UI
+local dragInput, mousePos, framePos
+local dragging = false
+
+tabHeader.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        framePos = window.Position
     end
+end)
 
-    local API = {}
-
-    function API:Notify(title, msg)
-        Notify(title, msg)
+UIS.InputChanged:Connect(function(input)
+    if dragging then
+        local delta = input.Position - mousePos
+        window.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
     end
+end)
 
-    function API:AddTab(info)
-        local tabBtn = Instance.new("TextButton", tabBar)
-        tabBtn.Size = UDim2.new(0, 100, 1, 0)
-        tabBtn.Text = info.Title or "Tab"
-        tabBtn.Font = Enum.Font.GothamBold
-        tabBtn.TextSize = 14
-        tabBtn.TextColor3 = Color3.new(1, 1, 1)
-        tabBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 6)
-
-        local page = Instance.new("ScrollingFrame", content)
-        page.Size = UDim2.new(1, 0, 1, 0)
-        page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        page.ScrollBarThickness = 6
-        page.Visible = false
-        page.BackgroundTransparency = 1
-        local layout = Instance.new("UIListLayout", page)
-        layout.Padding = UDim.new(0, 6)
-
-        tabBtn.MouseButton1Click:Connect(function()
-            for _, c in pairs(content:GetChildren()) do
-                if c:IsA("ScrollingFrame") then
-                    c.Visible = false
-                end
-            end
-            page.Visible = true
-        end)
-
-        local Tab = {}
-
-        function Tab:AddLabel(text)
-            local lbl = Instance.new("TextLabel", page)
-            lbl.Size = UDim2.new(1, -10, 0, 25)
-            lbl.Text = text
-            lbl.Font = Enum.Font.Gotham
-            lbl.TextSize = 14
-            lbl.TextColor3 = Color3.new(1, 1, 1)
-            lbl.BackgroundTransparency = 1
-        end
-
-        function Tab:AddButton(text, callback)
-            local btn = Instance.new("TextButton", page)
-            btn.Size = UDim2.new(1, -10, 0, 30)
-            btn.Text = text
-            btn.Font = Enum.Font.GothamBold
-            btn.TextSize = 14
-            btn.TextColor3 = Color3.new(1, 1, 1)
-            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-            btn.MouseButton1Click:Connect(callback)
-        end
-
-        return Tab
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
     end
+end)
 
-    return API
-end
+-- Hàm Toggle Tab Content
+toggleButton.MouseButton1Click:Connect(function()
+    if tabContent.Visible then
+        -- Ẩn Tab
+        TweenService:Create(tabContent, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+        wait(0.3)
+        tabContent.Visible = false
+    else
+        -- Hiển Thị Tab
+        tabContent.Visible = true
+        TweenService:Create(tabContent, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 1, -50)}):Play()
+    end
+end)
 
-return MasteryHub
+-- Hiển thị UI
+window.Visible = true
+
+-- Thiết lập cho tab button
+tabButton.MouseButton1Click:Connect(function()
+    -- Toggle hiển thị nội dung
+    toggleButton.MouseButton1Click()
+end)
